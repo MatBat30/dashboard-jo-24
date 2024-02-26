@@ -1,25 +1,42 @@
 import { PrimeReactProvider } from "primereact/api";
 import { useRef, useState } from "react";
 import { Toast } from "primereact/toast";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
+// PrimeReact
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+
+// Mes composants
+import NotFound from "./components/landing/not-found";
+import Discovery from "./components/landing/discovery";
+import LoginPage from "./components/auth/login";
 
 function App() {
   const toast = useRef(null);
   const router = createBrowserRouter([
     {
       path: "/",
-      element: 'Ici mon composant'
-    }
-  ])
+      Component: Discovery,
+    },
+    {
+      path: "/404",
+      Component: NotFound,
+    },
+    {
+      path: "/login",
+      Component: LoginPage,
+    },
+  ]);
+  const PrimeReactConfig = {
+    ripple: true,
+  };
 
   return (
     <>
-      <PrimeReactProvider>
-        <section className="w-full flex flex-column align-items-center h-full">
+      <PrimeReactProvider value={PrimeReactConfig}>
+        <section className="w-full h-full flex flex-column align-items-center">
           {/* Ajoutez ici le dashboard */}
           <RouterProvider router={router} />
         </section>
