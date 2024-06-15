@@ -1,7 +1,11 @@
 import { PrimeReactProvider } from "primereact/api";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Toast } from "primereact/toast";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 
 // PrimeReact
 import "primereact/resources/themes/lara-light-cyan/theme.css";
@@ -10,35 +14,55 @@ import "primeflex/primeflex.css";
 
 // Mes composants
 import NotFound from "./components/landing/not-found";
-import Discovery from "./components/landing/discovery";
+import HomePage from "./components/landing/home";
 import LoginPage from "./components/auth/login";
+import CreateUser from "./components/auth/creation";
+import ProfileDetails from "./components/profile/details";
+import ProfileEdit from "./components/profile/edit";
 
 function App() {
   const toast = useRef(null);
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      Component: Discovery,
-    },
-    {
-      path: "/404",
-      Component: NotFound,
-    },
-    {
-      path: "/login",
-      Component: LoginPage,
-    },
-  ]);
   const PrimeReactConfig = {
     ripple: true,
   };
+  const routes = createBrowserRouter([
+    {
+      path: "/",
+      element: <Navigate to="/login" />,
+    },
+    {
+      path: "/home",
+      element: <HomePage />,
+    },
+    {
+      path: "/login",
+      element: <LoginPage />,
+    },
+    {
+      path: "/create",
+      element: <CreateUser />,
+    },
+    {
+      path: "/404",
+      element: <NotFound />,
+    },
+    {
+      path: "/profile",
+      element: <ProfileDetails />,
+      children: [
+        {
+          path: "edit",
+          element: <ProfileEdit />
+        }
+      ]
+    },
+  ]);
 
   return (
     <>
       <PrimeReactProvider value={PrimeReactConfig}>
         <section className="w-full h-full flex flex-column align-items-center">
-          {/* Ajoutez ici le dashboard */}
-          <RouterProvider router={router} />
+          <RouterProvider router={routes} />
         </section>
         <Toast ref={toast} />
       </PrimeReactProvider>
