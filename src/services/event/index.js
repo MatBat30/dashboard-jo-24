@@ -1,16 +1,42 @@
 class EventService {
   async getEvent(id) {
-    return fetch(
+    const response = await fetch(
       `${import.meta.env.VITE_API_URL}/epreuve${id ? "/" + id : "s"}`
-    )
-      .then((response) => response.json())
-      .catch((error) => console.error("Error:", error));
+    );
+
+    const data = await response.json();
+
+    if (id) {
+      return {
+        status: response.status,
+        events: data,
+      };
+    }
+
+    return {
+      status: response.status,
+      events: data,
+    };
   }
 
   async getTeams(id) {
-    return fetch(`${import.meta.env.VITE_API_URL}/team${id ? "/" + id : "s"}`)
-      .then((response) => response.json())
-      .catch((error) => console.error("Error:", error));
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/team${id ? "/" + id : "s"}`
+    ).catch((error) => console.error("Error:", error));
+
+    const data = response.json();
+
+    if (id) {
+      return {
+        status: response.status,
+        event: data,
+      };
+    }
+
+    return {
+      status: response.status,
+      events: data,
+    };
   }
 
   async getMatch(id) {

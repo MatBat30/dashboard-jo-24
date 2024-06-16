@@ -4,10 +4,12 @@ class ProfileService {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/user${id ? "/" + id : "s"}`
     );
+    let data = await response.json()
+
     if (id) {
       return {
         status: response.status,
-        user: response.json(),
+        user: data.user,
       };
     } else {
       return {
@@ -27,9 +29,11 @@ class ProfileService {
         body: JSON.stringify({ email: email, password: password }),
       });
 
+      let data = await response.json()
+
       return {
         status: response.status,
-        user: await response.json(),
+        user: data.user,
       };
     } catch (error) {
       console.error("Error:", error);
@@ -55,14 +59,12 @@ class ProfileService {
         }
       );
 
-      if (response.ok) {
-        const data = await response.text();
-        console.log("User created successfully:", data);
-      } else {
-        const error = await response.text();
-        console.error("User creation failed:", error);
-      }
-      return response.status;
+      let data = await response.json()
+
+      return {
+        status: response.status,
+        user: data.user,
+      };
     } catch (error) {
       console.error("Error:", error);
     }
@@ -87,49 +89,78 @@ class ProfileService {
         }
       );
 
-      if (response.ok) {
-        const data = await response.text();
-        console.log("User created successfully:", data);
-      } else {
-        const error = await response.text();
-        console.error("User creation failed:", error);
-      }
-      return response.status;
+      return {
+        status: response.status,
+        user: await response.json(),
+      };
     } catch (error) {
       console.error("Error:", error);
     }
   }
 
-  async addFavori(user_id, match_id) {
+  async addFavori(userId, matchId) {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/add-favori`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ user_id: user_id, match_id: match_id }),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/add-favori`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          match_id: matchId,
+        }),
+      });
 
-      if (response.ok) {
-        const data = await response.text();
-        console.log("Favori added successfully:", data);
-      } else {
-        const error = await response.text();
-        console.error("Failed to add favori:", error);
+      if (!response.ok) {
+        throw new Error(
+          `Erreur lors de l'ajout du favori : ${response.statusText}`
+        );
       }
-      return response.status;
+
+      const result = await response.json();
+      return {
+        status: response.status,
+        result: result
+      }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Erreur:", error);
     }
   }
 
-  async getFavori(user_id) {
-    return fetch(`${import.meta.env.VITE_API_URL}/favori/user/${user_id}`)
-      .then((response) => response.json())
-      .catch((error) => console.error("Error:", error));
+  async fetchMatchFavoris(userId) {
+    try {
+      // Fetching favoris of the user
+      const responseFavoris = await fetch(
+        `${import.meta.env.VITE_API_URL}/favoris/user/${userId}`
+      );
+      if (!responseFavoris.ok) {
+        throw new Error(
+          `Erreur lors de la récupération des favoris : ${responseFavoris.statusText}`
+        );
+      }
+      const favoris = await responseFavoris.json();
+
+      // Collect match IDs from the favoris
+      const matchIds = favoris.map((favori) => favori.match_id);
+      let userFavoritesMatch = []
+      // Fetch details for each match and log them
+      for (const matchId of matchIds) {
+        const responseMatch = await fetch(
+          `${import.meta.env.VITE_API_URL}/match/${matchId}`
+        );
+        if (!responseMatch.ok) {
+          throw new Error(
+            `Erreur lors de la récupération du match ${matchId} : ${responseMatch.statusText}`
+          );
+        }
+        const match = await responseMatch.json();
+        userFavoritesMatch.push(match)
+      }
+
+      return userFavoritesMatch
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 

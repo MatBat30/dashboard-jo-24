@@ -1,5 +1,5 @@
 import { PrimeReactProvider } from "primereact/api";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Toast } from "primereact/toast";
 import {
   Navigate,
@@ -19,7 +19,8 @@ import LoginPage from "./components/auth/login";
 import CreateUser from "./components/auth/creation";
 import ProfileDetails from "./components/profile/details";
 import ProfileEdit from "./components/profile/edit";
-import { UserContext } from "./hooks/contextUser";
+import UserContextProvider from "./hooks/userContextProvider";
+import EventData from "./components/landing/events";
 
 function App() {
   const toast = useRef(null);
@@ -30,6 +31,7 @@ function App() {
     {
       path: "/",
       element: <Navigate to="/login" />,
+      errorElement: <NotFound />,
     },
     {
       path: "/home",
@@ -38,10 +40,12 @@ function App() {
     {
       path: "/login",
       element: <LoginPage />,
+      errorElement: <NotFound />,
     },
     {
       path: "/create",
       element: <CreateUser />,
+      errorElement: <NotFound />,
     },
     {
       path: "/404",
@@ -49,26 +53,40 @@ function App() {
     },
     {
       path: "/profile",
-      element: <ProfileDetails />,
       children: [
+        {
+          path: "details",
+          element: <ProfileDetails />,
+        },
         {
           path: "edit",
           element: <ProfileEdit />,
         },
       ],
     },
-  ]);
+    {
+      path: "/events",
+      element: <EventData />,
+      errorElement: <NotFound />,
 
-  const [user, setUserContext] = useState(undefined)
+      children: [
+        {
+          path: ":id",
+          element: <ProfileEdit />,
+          errorElement: <NotFound />,
+        },
+      ],
+    },
+  ]);
 
   return (
     <>
       <PrimeReactProvider value={PrimeReactConfig}>
-        <UserContext.Provider value={{user, setUserContext}}>
+        <UserContextProvider>
           <section className="w-full h-full flex flex-column align-items-center">
             <RouterProvider router={routes} />
           </section>
-        </UserContext.Provider>
+        </UserContextProvider>
         <Toast ref={toast} />
       </PrimeReactProvider>
     </>

@@ -8,7 +8,7 @@ import { FloatLabel } from "primereact/floatlabel";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import ProfileService from "/src/services/profile";
-import { UserContext } from "../../../hooks/contextUser";
+import { Password } from "primereact/password";
 
 export default function createUser() {
   const stepperRef = useRef(null);
@@ -49,14 +49,23 @@ export default function createUser() {
         password
       );
 
-      if (req == 200) {
+      const userResponse = req.user;
+      let finalUserModel = {
+        id: userResponse.user_id,
+        firstname: userResponse.prenom,
+        lastname: userResponse.nom,
+        birthday: userResponse.date_naissance,
+        email: userResponse.email,
+      };
+
+      if (req.status == 200) {
+        localStorage.setItem("user", JSON.stringify(finalUserModel));
         navigate("/home");
       } else {
         toast.current.show({
           severity: "error",
           summary: "Erreur",
-          detail:
-            "L'utilisateur existe déjà",
+          detail: "L'utilisateur existe déjà",
           life: 5000,
         });
       }
@@ -82,7 +91,7 @@ export default function createUser() {
         orientation="vertical"
       >
         <StepperPanel header="Qui êtes-vous ?">
-        <div className="flex py-4">
+          <div className="flex py-4">
             <Button
               label="Retour à la page de connexion"
               icon="pi pi-arrow-left"
@@ -100,6 +109,7 @@ export default function createUser() {
                   <InputText
                     id="firsname"
                     value={firstname}
+                    className="w-full"
                     invalid={firstname && !isInputTextNotEmpty(firstname)}
                     onChange={(e) => setFirstname(e.target.value)}
                   />
@@ -112,6 +122,7 @@ export default function createUser() {
                   <InputText
                     id="lastname"
                     value={lastname}
+                    className="w-full"
                     invalid={lastname && !isInputTextNotEmpty(lastname)}
                     onChange={(e) => setLastname(e.target.value)}
                   />
@@ -129,6 +140,7 @@ export default function createUser() {
                     type="text"
                     value={email}
                     invalid={email && !emailRegex.test(email)}
+                    className="w-full"
                     onChange={(e) => {
                       setEmail(e.target.value);
                       emailRegex.test(email);
@@ -144,6 +156,7 @@ export default function createUser() {
                     id="birthday"
                     mask="99/99/9999"
                     value={birthday}
+                    className="w-full"
                     invalid={birthday && !birthdayRegex.test(birthday)}
                     onChange={(e) => setBirthday(e.target.value)}
                   />
@@ -153,34 +166,45 @@ export default function createUser() {
                 </FloatLabel>
 
                 <FloatLabel className="w-5">
+                  <Password
+                    id="password"
+                    type="password"
+                    toggleMask
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    pt={{
+                      input: { className: "w-full" },
+                      root: { className: "w-full block" },
+                    }}
+                  />
                   <label
                     htmlFor="password"
                     className="block text-900 font-medium"
                   >
                     Mot de passe
                   </label>
-                  <InputText
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
                 </FloatLabel>
 
                 <FloatLabel className="w-5">
-                  <label
-                    htmlFor="passwordConfirmation"
-                    className="block text-900 font-medium"
-                  >
-                    Confirmer le mot de passe
-                  </label>
-                  <InputText
+                  <Password
                     id="passwordConfirm"
                     type="password"
                     invalid={passwordConfirmation && !passwordIsSame()}
                     value={passwordConfirmation}
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
+                    pt={{
+                      input: { className: "w-full" },
+                      root: { className: "w-full block" },
+                    }}
+                    toggleMask
+                    feedback={false}
                   />
+                  <label
+                    htmlFor="passwordConfirmation"
+                    className=" text-900 font-medium"
+                  >
+                    Confirmer le mot de passe
+                  </label>
                 </FloatLabel>
               </form>
             </div>

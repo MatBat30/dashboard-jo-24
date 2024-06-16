@@ -1,15 +1,13 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Menubar } from "primereact/menubar";
 import { Badge } from "primereact/badge";
 import { Avatar } from "primereact/avatar";
-import {
-  faBasketball,
-  faFutbol,
-  faTableTennisPaddleBall,
-  faVolleyball,
-} from "@fortawesome/free-solid-svg-icons";
+import { faMedal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Button } from "primereact/button";
+import { deleteUserContext } from "../../../hooks/contextUser";
 
 export default function NavBar() {
   const itemRenderer = (item) => (
@@ -20,53 +18,62 @@ export default function NavBar() {
     </a>
   );
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const ProfilePanel = useRef(null);
 
   const items = [
     {
       label: "Accueil",
       icon: "pi pi-home",
-      url: "/home"
+      url: "/home",
     },
     {
-      label: "Mes favoris",
-      icon: "pi pi-star",
+      label: "Épreuves",
+      icon: <FontAwesomeIcon className="mr-2" icon={faMedal} />,
+      url: "events",
     },
-    {
-      label: "Sports",
-      icon: <FontAwesomeIcon className="mr-2" icon={faTableTennisPaddleBall} />,
-      items: [
-        {
-          id: 1,
-          icon: faBasketball,
-          label: "Basketball",
-          template: itemRenderer,
-        },
-        {
-          id: 2,
-          icon: faFutbol,
-          label: "Football",
-          template: itemRenderer,
-        },
-        {
-          id: 3,
-          icon: faVolleyball,
-          label: "Volleyball",
-          template: itemRenderer,
-        },
-      ],
-    }
   ];
 
   const start = <img alt="logo" src="/jo-24.jpg" height="50" width="50"></img>;
   const end = (
-    <Avatar
-      icon="pi pi-user"
-      className="cursor-pointer"
-      size="large"
-      shape="circle"
-      onClick={() => navigate("/profile")}
-    />
+    <div>
+      <Avatar
+        icon="pi pi-user"
+        className="cursor-pointer"
+        size="large"
+        shape="circle"
+        onClick={(e) => ProfilePanel.current.toggle(e)}
+      />
+      <OverlayPanel ref={ProfilePanel} className="right-0">
+        <Button
+          label="Détails du compte"
+          icon="pi pi-user"
+          iconPos="left"
+          className="w-full"
+          severity="info"
+          text
+          onClick={() => navigate("/profile/details")}
+        />
+        <Button
+          label="Modifier mon compte"
+          icon="pi pi-pencil"
+          iconPos="left"
+          className="w-full"
+          severity="info"
+          text
+          onClick={() => navigate("/profile/edit")}
+        />
+        <Button
+          label="Déconnexion"
+          className="w-full"
+          icon="pi pi-sign-out"
+          iconPos="left"
+          severity="danger"
+          outlined
+          onClick={() => deleteUserContext()}
+        />
+      </OverlayPanel>
+    </div>
   );
 
   return (

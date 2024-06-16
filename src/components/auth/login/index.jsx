@@ -7,21 +7,38 @@ import { Toast } from "primereact/toast";
 import ProfileService from "../../../services/profile";
 import { useNavigate } from "react-router-dom";
 import { FloatLabel } from "primereact/floatlabel";
-import { UserContext } from "../../../hooks/contextUser";
+import UserContext from "../../../hooks/contextUser";
 
 function LoginPage() {
   const [isBinary, setIsBinary] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const {setUser} = useContext(UserContext)
   const toast = useRef(null);
   const navigate = useNavigate();
+
+  const handleKeyDownEnter = (event) => {
+    if (event.key === 'Enter') {
+      loginHandler()
+    }
+  }
 
   const loginHandler = async () => {
     if (email.trim() != "" && password.length > 0) {
       let isUserLogged = await ProfileService.loginUser(email, password);
 
-      if (isUserLogged.status == 200) {
+      const userResponse  = isUserLogged.user
+      let finalUserModel = {
+        id: userResponse.user_id,
+        firstname: userResponse.prenom,
+        lastname: userResponse.nom,
+        birthday: userResponse.date_naissance,
+        email: userResponse.email,
+      }
 
+      if (isUserLogged.status == 200) {
+        localStorage.setItem("user", JSON.stringify(finalUserModel))
+        setUser(finalUserModel)
         navigate("/home");
       } else if (isUserLogged.status == 401) {
         toast.current.show({
@@ -92,10 +109,13 @@ function LoginPage() {
                 inputId="password"
                 value={password}
                 feedback={false}
-                pt={{
-                  input: { className: "w-full" },
-                  root: { className: "w-full" },
-                }}
+                toggleMask
+                pt={
+                  {
+                    input: {className: "w-full"},
+                    root: {className: "w-full block"}
+                  }
+                }
                 onChange={(e) => setPassword(e.target.value)}
               />
               <label htmlFor="password" className=" text-900 font-medium mb-2">
@@ -124,6 +144,7 @@ function LoginPage() {
               icon="pi pi-user"
               className="w-full p-3"
               onClick={() => loginHandler()}
+              onKeyUp={handleKeyDownEnter}
             />
           </div>
         </div>
