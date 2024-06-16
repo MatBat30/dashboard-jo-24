@@ -1,115 +1,74 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { InputMask } from "primereact/inputmask";
 import { FloatLabel } from "primereact/floatlabel";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBasketball,
-  faFutbol,
-  faVolleyball,
-} from "@fortawesome/free-solid-svg-icons";
-import { Chip } from "primereact/chip";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
-
-function ChipCustomList() {
-  const [sportList, setSportList] = useState([]);
-
-  useEffect(() => {
-    if (sportList.length == 0) {
-      setSportList([
-        {
-          id: 1,
-          icon: faBasketball,
-          label: "Basketball",
-          checked: false,
-        },
-        {
-          id: 2,
-          icon: faFutbol,
-          label: "Football",
-          checked: false,
-        },
-        {
-          id: 3,
-          icon: faVolleyball,
-          label: "Volleyball",
-          checked: false,
-        },
-      ]);
-    }
-
-    console.log(sportList);
-  }, [sportList]);
-
-  return (
-    <>
-      {sportList.map((item, key) => (
-        <Chip
-          key={item.id}
-          className={
-            item.checked
-              ? "border-1 bg-primary text-white p-2 cursor-pointer select-none"
-              : "border-1 surface-100 text-500 p-2 cursor-pointer select-none"
-          }
-          template={
-            <>
-              <FontAwesomeIcon icon={item.icon} />
-              <span className="ml-2 font-medium">{item.label}</span>
-            </>
-          }
-          onClick={() => {
-            setSportList(
-              sportList.map((originalItem) => {
-                if (originalItem.id - 1 == key) {
-                  originalItem.checked = !originalItem.checked;
-                  return originalItem;
-                }
-
-                return originalItem;
-              })
-            );
-          }}
-        />
-      ))}
-    </>
-  );
-}
+import ProfileService from "/src/services/profile";
+import { UserContext } from "../../../hooks/contextUser";
 
 export default function createUser() {
   const stepperRef = useRef(null);
-  const toast = useRef(null)
+  const toast = useRef(null);
   const [firstname, setFirstname] = useState(null);
   const [lastname, setLastname] = useState(null);
   const [email, setEmail] = useState(null);
+  const [birthday, setBirthday] = useState(null);
   const emailRegex = new RegExp("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+  const birthdayRegex = new RegExp(
+    "^(0[1-9]|1[012])[-/.](0[1-9]|[12][0-9]|3[01])[-/.](19|20)\\d\\d$"
+  );
   const [password, setPassword] = useState(null);
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const passwordIsSame = () => {
-    return password == passwordConfirmation
-  }
+    return password == passwordConfirmation;
+  };
 
   const isInputTextNotEmpty = (input) => {
-    return input.trim().length > 0
-  }
+    return input.trim().length > 0;
+  };
 
-  const formValidation = () => {
-    if (isInputTextNotEmpty(firstname) && isInputTextNotEmpty(lastname) && emailRegex.test(email) && passwordIsSame()) {
-        navigate("/home")
-    } else {
+  const formValidation = async () => {
+    if (
+      isInputTextNotEmpty(firstname) &&
+      isInputTextNotEmpty(lastname) &&
+      emailRegex.test(email) &&
+      passwordIsSame() &&
+      birthdayRegex.test(birthday)
+    ) {
+      let req = await ProfileService.createUser(
+        lastname,
+        firstname,
+        birthday,
+        email,
+        password
+      );
+
+      if (req == 200) {
+        navigate("/home");
+      } else {
         toast.current.show({
-            severity: 'warning',
-            summary: "Champs Invalides",
-            description: "Un ou plusieurs champs sont invalides. Vueillez les corrigés.",
-            life: 5000
-        })
+          severity: "error",
+          summary: "Erreur",
+          detail:
+            "L'utilisateur existe déjà",
+          life: 5000,
+        });
+      }
+    } else {
+      toast.current.show({
+        severity: "warn",
+        summary: "Champs Invalides",
+        detail: "Un ou plusieurs champs sont invalides. Vueillez les corrigés.",
+        life: 5000,
+      });
     }
-
-  }
+  };
 
   return (
     <div className="card w-10">
@@ -123,53 +82,77 @@ export default function createUser() {
         orientation="vertical"
       >
         <StepperPanel header="Qui êtes-vous ?">
+        <div className="flex py-4">
+            <Button
+              label="Retour à la page de connexion"
+              icon="pi pi-arrow-left"
+              iconPos="left"
+              severity="secondary"
+              onClick={() => {
+                navigate("/login");
+              }}
+            />
+          </div>
           <div className="flex flex-column h-fit">
             <div className="border-2 border-1 surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
               <form className="flex flex-wrap gap-5 h-full p-5">
-                <FloatLabel>
-                  <label
-                    htmlFor="firstname"
-                    className="block text-900 font-medium"
-                  >
-                    Prénom
-                  </label>
+                <FloatLabel className="w-5">
                   <InputText
                     id="firsname"
                     value={firstname}
-                    invalid={firstname && !isInputTextNotEmpty(firstname) }
+                    invalid={firstname && !isInputTextNotEmpty(firstname)}
                     onChange={(e) => setFirstname(e.target.value)}
                   />
+                  <label htmlFor="firstname" className="text-900 font-medium">
+                    Prénom
+                  </label>
                 </FloatLabel>
 
-                <FloatLabel>
+                <FloatLabel className="w-5">
+                  <InputText
+                    id="lastname"
+                    value={lastname}
+                    invalid={lastname && !isInputTextNotEmpty(lastname)}
+                    onChange={(e) => setLastname(e.target.value)}
+                  />
                   <label
                     htmlFor="lastname"
                     className="block text-900 font-medium"
                   >
                     Nom de famille
                   </label>
-                  <InputText
-                    id="lastname"
-                    value={lastname}
-                    invalid={lastname && !isInputTextNotEmpty(lastname) }
-                    onChange={(e) => setLastname(e.target.value)}
-                  />
                 </FloatLabel>
 
-                <FloatLabel>
-                  <label htmlFor="email" className="block text-900 font-medium">
-                    Email
-                  </label>
+                <FloatLabel className="w-5">
                   <InputText
                     id="email"
                     type="text"
                     value={email}
                     invalid={email && !emailRegex.test(email)}
-                    onChange={(e) => {setEmail(e.target.value); emailRegex.test(email) }}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      emailRegex.test(email);
+                    }}
                   />
+                  <label htmlFor="email" className="block text-900 font-medium">
+                    Email
+                  </label>
                 </FloatLabel>
 
-                <FloatLabel>
+                <FloatLabel className="w-5">
+                  <InputMask
+                    id="birthday"
+                    mask="99/99/9999"
+                    value={birthday}
+                    invalid={birthday && !birthdayRegex.test(birthday)}
+                    onChange={(e) => setBirthday(e.target.value)}
+                  />
+                  <label htmlFor="birthday" className="text-900 font-medium">
+                    Date de naissance
+                  </label>
+                </FloatLabel>
+
+                <FloatLabel className="w-5">
                   <label
                     htmlFor="password"
                     className="block text-900 font-medium"
@@ -184,7 +167,7 @@ export default function createUser() {
                   />
                 </FloatLabel>
 
-                <FloatLabel>
+                <FloatLabel className="w-5">
                   <label
                     htmlFor="passwordConfirmation"
                     className="block text-900 font-medium"
@@ -204,33 +187,12 @@ export default function createUser() {
           </div>
           <div className="flex py-4">
             <Button
-              label="Next"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              onClick={() => stepperRef.current.nextCallback()}
-            />
-          </div>
-        </StepperPanel>
-        <StepperPanel header="Quel sport souhaitez-vous suivre ?">
-          <div className="flex py-4 ">
-            <Button
-              label="Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              onClick={() => stepperRef.current.prevCallback()}
-            />
-          </div>
-          <div className="flex flex-column h-12rem">
-            <div className="border-2 border-1 surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium gap-2">
-              <ChipCustomList />
-            </div>
-          </div>
-          <div className="flex py-4 ">
-            <Button
               label="Valider l'inscription"
               icon="pi pi-check"
               iconPos="right"
-              onClick={() => formValidation()}
+              onClick={() => {
+                formValidation();
+              }}
             />
           </div>
         </StepperPanel>

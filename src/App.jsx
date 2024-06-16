@@ -1,5 +1,5 @@
 import { PrimeReactProvider } from "primereact/api";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import {
   Navigate,
@@ -19,6 +19,7 @@ import LoginPage from "./components/auth/login";
 import CreateUser from "./components/auth/creation";
 import ProfileDetails from "./components/profile/details";
 import ProfileEdit from "./components/profile/edit";
+import { UserContext } from "./hooks/contextUser";
 
 function App() {
   const toast = useRef(null);
@@ -52,18 +53,22 @@ function App() {
       children: [
         {
           path: "edit",
-          element: <ProfileEdit />
-        }
-      ]
+          element: <ProfileEdit />,
+        },
+      ],
     },
   ]);
+
+  const [user, setUserContext] = useState(undefined)
 
   return (
     <>
       <PrimeReactProvider value={PrimeReactConfig}>
-        <section className="w-full h-full flex flex-column align-items-center">
-          <RouterProvider router={routes} />
-        </section>
+        <UserContext.Provider value={{user, setUserContext}}>
+          <section className="w-full h-full flex flex-column align-items-center">
+            <RouterProvider router={routes} />
+          </section>
+        </UserContext.Provider>
         <Toast ref={toast} />
       </PrimeReactProvider>
     </>
