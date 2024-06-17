@@ -1,1 +1,0 @@
-// logique des tri etc + les requêtes http avec fetch

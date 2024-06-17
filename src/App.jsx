@@ -1,28 +1,92 @@
 import { PrimeReactProvider } from "primereact/api";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Toast } from "primereact/toast";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 
+// PrimeReact
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+
+// Mes composants
+import NotFound from "./components/landing/not-found";
+import HomePage from "./components/landing/home";
+import LoginPage from "./components/auth/login";
+import CreateUser from "./components/auth/creation";
+import ProfileDetails from "./components/profile/details";
+import ProfileEdit from "./components/profile/edit";
+import UserContextProvider from "./hooks/userContextProvider";
+import EventData from "./components/landing/events";
 
 function App() {
   const toast = useRef(null);
-  const router = createBrowserRouter([
+  const PrimeReactConfig = {
+    ripple: true,
+  };
+  const routes = createBrowserRouter([
     {
       path: "/",
-      element: 'Ici mon composant'
-    }
-  ])
+      element: <Navigate to="/login" />,
+      errorElement: <NotFound />,
+    },
+    {
+      path: "/home",
+      element: <HomePage />,
+    },
+    {
+      path: "/login",
+      element: <LoginPage />,
+      errorElement: <NotFound />,
+    },
+    {
+      path: "/create",
+      element: <CreateUser />,
+      errorElement: <NotFound />,
+    },
+    {
+      path: "/404",
+      element: <NotFound />,
+    },
+    {
+      path: "/profile",
+      children: [
+        {
+          path: "details",
+          element: <ProfileDetails />,
+        },
+        {
+          path: "edit",
+          element: <ProfileEdit />,
+        },
+      ],
+    },
+    {
+      path: "/events",
+      element: <EventData />,
+      errorElement: <NotFound />,
+
+      children: [
+        {
+          path: ":id",
+          element: <ProfileEdit />,
+          errorElement: <NotFound />,
+        },
+      ],
+    },
+  ]);
 
   return (
     <>
-      <PrimeReactProvider>
-        <section className="w-full flex flex-column align-items-center h-full">
-          {/* Ajoutez ici le dashboard */}
-          <RouterProvider router={router} />
-        </section>
+      <PrimeReactProvider value={PrimeReactConfig}>
+        <UserContextProvider>
+          <section className="w-full h-full flex flex-column align-items-center">
+            <RouterProvider router={routes} />
+          </section>
+        </UserContextProvider>
         <Toast ref={toast} />
       </PrimeReactProvider>
     </>
