@@ -21,6 +21,7 @@ import ProfileDetails from "./components/profile/details";
 import ProfileEdit from "./components/profile/edit";
 import UserContextProvider from "./hooks/userContextProvider";
 import EventData from "./components/landing/events";
+import EventChild from "./components/landing/events/child";
 
 function App() {
   const toast = useRef(null);
@@ -68,14 +69,10 @@ function App() {
       path: "/events",
       element: <EventData />,
       errorElement: <NotFound />,
-
-      children: [
-        {
-          path: ":id",
-          element: <ProfileEdit />,
-          errorElement: <NotFound />,
-        },
-      ],
+    },
+    {
+      path: "event/:id_event",
+      element: <EventChild />
     },
   ]);
 

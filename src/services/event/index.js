@@ -22,27 +22,37 @@ class EventService {
   async getTeams(id) {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/team${id ? "/" + id : "s"}`
-    ).catch((error) => console.error("Error:", error));
-
-    const data = response.json();
+    );
 
     if (id) {
       return {
         status: response.status,
-        event: data,
+        event: await response.json(),
       };
     }
 
     return {
       status: response.status,
-      events: data,
+      events: await response.json(),
     };
   }
 
   async getMatch(id) {
-    return fetch(`${import.meta.env.VITE_API_URL}/match${id ? "/" + id : "s"}`)
-      .then((response) => response.json())
-      .catch((error) => console.error("Error:", error));
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/match${id ? "/" + id : "s"}`
+    );
+
+    if (id) {
+      return {
+        status: response.status,
+        match: await response.json(),
+      };
+    }
+
+    return {
+      status: response.status,
+      matches: await response.json(),
+    };
   }
 }
 

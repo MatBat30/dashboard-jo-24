@@ -1,22 +1,14 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
-const UserContext = createContext();
+let userInStorage = JSON.parse(localStorage.getItem("user"))
+
+let finalUser = {
+    id: userInStorage.id,
+    firstname: userInStorage.firstname,
+    lastname: userInStorage.lastname,
+    birthday: userInStorage.birthday,
+    email: userInStorage.email,
+}
+
+const UserContext = createContext(finalUser);
 export default UserContext;
-
-export function useUserContext() {
-  const user = useContext(UserContext);
-  if (user == undefined) throw new Error("userContext is undefined");
-  return user;
-}
-
-export function updateUserContext(data) {
-  if (data == undefined)
-    throw new Error("cannot create context because data is undefined");
-  UserContext = createContext(data);
-  return useUserContext();
-}
-
-export function deleteUserContext() {
-  UserContext = createContext(undefined);
-  return useUserContext();
-}

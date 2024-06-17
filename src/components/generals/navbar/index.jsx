@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Button } from "primereact/button";
-import { deleteUserContext } from "../../../hooks/contextUser";
 
 export default function NavBar() {
   const itemRenderer = (item) => (
@@ -70,7 +69,6 @@ export default function NavBar() {
           iconPos="left"
           severity="danger"
           outlined
-          onClick={() => deleteUserContext()}
         />
       </OverlayPanel>
     </div>

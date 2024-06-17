@@ -3,6 +3,7 @@ import ProfileService from "../../../services/profile";
 import { useContext, useEffect, useState } from "react";
 import UserContext from "../../../hooks/contextUser";
 import { Carousel } from "primereact/carousel";
+import { Navigate } from "react-router-dom";
 
 function FavoriCarousel() {
   const [favorisList, setfavorisList] = useState([]);
@@ -92,17 +93,31 @@ function FavoriCarousel() {
 function HomePage() {
   const { user, setUser } = useContext(UserContext);
 
-  return (
-    <div className="w-full flex flex-column">
-      <NavBar />
-      <div className="p-5">
-        <span className="font-medium text-3xl text-900 mb-3">Bienvenue {user.firstname} {user.lastname}</span>
+  useEffect(() => {
+    if (user == null) {
+      setUser(JSON.parse(localStorage.getItem("user")))
+    }
+  }, [])
+
+  if (user) {
+    return (
+      <div className="w-full flex flex-column">
+        <NavBar />
+        <div className="p-5">
+          <span className="font-medium text-3xl text-900 mb-3">Bienvenue {user.firstname ? user.firstname : 'test'} {user.lastname ? user.lastname : 'Utilisateur'}</span>
+        </div>
+        <section>
+          <FavoriCarousel />
+        </section>
       </div>
-      <section>
-        <FavoriCarousel />
-      </section>
-    </div>
-  );
+    );
+   
+  }
+
+  return (
+    <Navigate to="/login" />
+  )
+
 }
 
 export default HomePage;

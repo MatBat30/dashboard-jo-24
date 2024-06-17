@@ -2,7 +2,7 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Checkbox } from "primereact/checkbox";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import ProfileService from "../../../services/profile";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,13 @@ function LoginPage() {
   const {setUser} = useContext(UserContext)
   const toast = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    
+    if (localStorage.getItem("user")) {
+      navigate("/home")
+    }
+  }, [])
 
   const handleKeyDownEnter = (event) => {
     if (event.key === 'Enter') {
@@ -95,6 +102,7 @@ function LoginPage() {
                 value={email}
                 className="w-full"
                 onChange={(e) => setEmail(e.target.value)}
+                autoFocus
               />
               <label
                 htmlFor="email"
